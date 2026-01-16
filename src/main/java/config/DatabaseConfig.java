@@ -6,9 +6,9 @@ import java.sql.SQLException;
 
 public class DatabaseConfig {
     private static final String URL =
-            "jdbc:mysql://localhost:3306/seu_banco?useSSL=false&serverTimezone=UTC";
-    private static final String USER = "root";
-    private static final String PASS = "senha";
+            "jdbc:mysql://localhost:3306/biblioteca?useSSL=false&serverTimezone=UTC";
+    private static final String USER = "biblioteca_user";
+    private static final String PASS = "biblioteca_pass";
 
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(URL, USER, PASS);
