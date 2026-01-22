@@ -1,6 +1,5 @@
 package service;
 
-import lombok.RequiredArgsConstructor;
 import model.Categoria;
 import repository.CategoriaRepository;
 
@@ -9,10 +8,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class CategoriaService {
 
     private final CategoriaRepository categoriaRepository;
+
+    public CategoriaService(CategoriaRepository categoriaRepository) {
+        this.categoriaRepository = categoriaRepository;
+    }
 
 
     public Map<String, Object> buscarPorId(int id) throws SQLException {

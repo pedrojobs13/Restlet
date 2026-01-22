@@ -1,19 +1,24 @@
 package controller;
 
-import lombok.RequiredArgsConstructor;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
+import repository.AutorRepositoryImpl;
+import repository.LivrosRepositoryImpl;
 import service.AutorLivrosService;
+import utils.ObjectMapperProvider;
 
 import java.util.Map;
 
 
-@RequiredArgsConstructor
 public class AutorLivrosController extends ServerResource {
     private final AutorLivrosService autorLivrosService;
+
+    public AutorLivrosController() {
+        this.autorLivrosService = new AutorLivrosService(new AutorRepositoryImpl(), new LivrosRepositoryImpl());
+    }
 
     @Get("json")
     public Representation listarLivrosDoAutor() {
@@ -37,7 +42,11 @@ public class AutorLivrosController extends ServerResource {
             var response = autorLivrosService.listarLivrosDoAutor(autorId, page, limit);
 
             setStatus(Status.SUCCESS_OK);
-            return new JacksonRepresentation<>(response);
+            JacksonRepresentation<Map<String, Object>> rep =
+                    new JacksonRepresentation<>(response);
+            rep.setObjectMapper(ObjectMapperProvider.get());
+
+            return rep;
 
         } catch (IllegalArgumentException e) {
             setStatus(Status.CLIENT_ERROR_NOT_FOUND);

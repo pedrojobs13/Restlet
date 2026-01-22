@@ -20,6 +20,8 @@ public class Routes extends Application {
         router.attach("/autores/{id}", AutorController.class);
         router.attach("/autores/{id}/livros", AutorController.class);
 
+        router.attach("/autores/{id}/livros", AutorLivrosController.class);
+
         router.attach("/categorias", CategoriaController.class);
         router.attach("/categorias/{id}", CategoriaController.class);
 

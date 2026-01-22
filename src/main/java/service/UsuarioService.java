@@ -8,10 +8,13 @@ import utils.PasswordUtil;
 import java.sql.SQLException;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
+
+    public UsuarioService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
 
     public Usuario buscarPorId(int id) throws SQLException {
         return usuarioRepository.buscarPorId(id);

@@ -67,6 +67,7 @@ public class AutorRepositoryImpl implements AutorRepository {
             stmt.setString(2, autor.getBio());
 
             if (autor.getDataNascimento() != null) {
+
                 stmt.setDate(3, Date.valueOf(autor.getDataNascimento()));
             } else {
                 stmt.setNull(3, Types.DATE);

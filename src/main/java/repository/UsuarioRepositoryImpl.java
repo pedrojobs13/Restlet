@@ -3,15 +3,14 @@ package repository;
 import config.DatabaseConfig;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import model.Usuario;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
 public class UsuarioRepositoryImpl implements UsuarioRepository {
+
     @Override
     public List<Usuario> listarTodos() throws SQLException {
         List<Usuario> usuarios = new ArrayList<>();

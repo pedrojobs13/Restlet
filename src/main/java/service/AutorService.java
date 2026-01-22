@@ -10,9 +10,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class AutorService {
     private final AutorRepository autorRepository;
+
+    public AutorService(AutorRepository autorRepository) {
+        this.autorRepository = autorRepository;
+    }
 
     public Autor buscarPorId(int id) throws SQLException {
         Autor autor = autorRepository.buscarPorId(id);

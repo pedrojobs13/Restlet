@@ -7,15 +7,18 @@ import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
+import repository.CategoriaRepositoryImpl;
 import service.CategoriaService;
 
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class CategoriaController extends ServerResource {
 
     private final CategoriaService categoriaService;
-    private final ObjectMapper mapper;
+
+    public CategoriaController() {
+        this.categoriaService = new CategoriaService(new CategoriaRepositoryImpl());
+    }
 
     @Get("json")
     public Representation listar() {

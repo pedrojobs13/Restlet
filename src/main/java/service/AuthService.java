@@ -10,10 +10,12 @@ import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class AuthService {
-
     private final UsuarioRepository usuarioRepository;
+
+    public AuthService(UsuarioRepository usuarioRepository) {
+        this.usuarioRepository = usuarioRepository;
+    }
 
     public Map<String, Object> register(Map<String, String> dados) throws SQLException {
         String nome = dados.get("nome");

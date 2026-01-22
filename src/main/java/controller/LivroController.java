@@ -1,18 +1,30 @@
 package controller;
 
-import lombok.RequiredArgsConstructor;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.sun.net.httpserver.Headers;
 import model.Livro;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.*;
+import repository.LivrosRepositoryImpl;
 import service.LivroService;
+import utils.JWTUtil;
+import utils.ObjectMapperProvider;
 
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class LivroController extends ServerResource {
 
     private final LivroService livroService;
+
+    public LivroController() {
+        this.livroService = new LivroService(new LivrosRepositoryImpl());
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.registerModule(new JavaTimeModule());
+        mapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
 
     @Get("json")
     public Representation listar() {
@@ -21,7 +33,11 @@ public class LivroController extends ServerResource {
 
             if (idStr != null) {
                 Livro livro = livroService.buscarPorId(Integer.parseInt(idStr));
-                return new JacksonRepresentation<>(livro);
+                JacksonRepresentation<Livro> rep =
+                        new JacksonRepresentation<>(livro);
+                rep.setObjectMapper(ObjectMapperProvider.get());
+
+                return rep;
             }
 
             int page = getQueryValue("page") != null
@@ -35,7 +51,11 @@ public class LivroController extends ServerResource {
             String titulo = getQueryValue("titulo");
 
             var response = livroService.listar(page, limit, titulo);
-            return new JacksonRepresentation<>(response);
+            JacksonRepresentation<Map<String, Object>> rep =
+                    new JacksonRepresentation<>(response);
+            rep.setObjectMapper(ObjectMapperProvider.get());
+
+            return rep;
 
         } catch (IllegalArgumentException e) {
             setStatus(org.restlet.data.Status.CLIENT_ERROR_NOT_FOUND);
@@ -48,15 +68,12 @@ public class LivroController extends ServerResource {
     }
 
     @Post("json")
-    public Representation criar(Representation entity) {
+    public Representation criar(Representation entity, Headers headers) {
         try {
             JacksonRepresentation<Livro> repr =
                     new JacksonRepresentation<>(entity, Livro.class);
             Livro livro = repr.getObject();
-
-            int usuarioId = 1;
-
-            Livro criado = livroService.criar(livro, usuarioId);
+                        Livro criado = livroService.criar(livro, livro.getAutorId());
 
             setStatus(org.restlet.data.Status.SUCCESS_CREATED);
             return new JacksonRepresentation<>(criado);

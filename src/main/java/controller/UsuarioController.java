@@ -8,6 +8,7 @@ import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
+import repository.UsuarioRepositoryImpl;
 import service.UsuarioService;
 
 import java.util.ArrayList;
@@ -15,11 +16,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class UsuarioController extends ServerResource {
 
     private final UsuarioService usuarioService;
-    private final ObjectMapper mapper;
+
+    public UsuarioController() {
+        this.usuarioService = new UsuarioService(new UsuarioRepositoryImpl());
+    }
 
     @Get("json")
     public Representation listar() {

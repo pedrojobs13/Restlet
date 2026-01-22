@@ -7,15 +7,19 @@ import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
+import repository.UsuarioRepositoryImpl;
 import service.AuthService;
 
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class AuthController extends ServerResource {
     private final ObjectMapper mapper;
     private final AuthService authService;
 
+    public AuthController() {
+        this.mapper = new ObjectMapper();
+        this.authService = new AuthService(new UsuarioRepositoryImpl());
+    }
     @Post("json")
     public Representation handleAuth(Representation entity) {
         try {

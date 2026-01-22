@@ -11,10 +11,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class AutorLivrosService {
+
     private final AutorRepository autorRepository;
     private final LivrosRepository livrosRepository;
+
+    public AutorLivrosService(AutorRepository autorRepository, LivrosRepository livrosRepository) {
+        this.autorRepository = autorRepository;
+        this.livrosRepository = livrosRepository;
+    }
 
     public Map<String, Object> listarLivrosDoAutor(int autorId, int page, int limit) throws SQLException {
         Autor autor = autorRepository.buscarPorId(autorId);

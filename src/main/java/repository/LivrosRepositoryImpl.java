@@ -111,9 +111,8 @@ public class LivrosRepositoryImpl implements LivrosRepository {
         Connection conn = null;
         try {
             conn = DatabaseConfig.getConnection();
-            conn.setAutoCommit(false); // Iniciar transação
+            conn.setAutoCommit(false);
 
-            // Inserir livro
             PreparedStatement stmt = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS);
             stmt.setString(1, livro.getTitulo());
             stmt.setString(2, livro.getDescricao());

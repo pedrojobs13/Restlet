@@ -9,10 +9,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@RequiredArgsConstructor
 public class LivroService {
 
     private final LivrosRepository livrosRepository;
+
+    public LivroService(LivrosRepository livrosRepository) {
+        this.livrosRepository = livrosRepository;
+    }
 
     public Livro buscarPorId(int id) throws SQLException {
         Livro livro = livrosRepository.buscarPorId(id);
