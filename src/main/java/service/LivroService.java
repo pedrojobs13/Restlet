@@ -1,8 +1,9 @@
 package service;
 
-import lombok.RequiredArgsConstructor;
 import model.Livro;
+import model.Usuario;
 import repository.LivrosRepository;
+import repository.UsuarioRepository;
 
 import java.sql.SQLException;
 import java.util.HashMap;
@@ -12,9 +13,11 @@ import java.util.Map;
 public class LivroService {
 
     private final LivrosRepository livrosRepository;
+    private final UsuarioRepository usuarioRepository;
 
-    public LivroService(LivrosRepository livrosRepository) {
+    public LivroService(LivrosRepository livrosRepository, UsuarioRepository usuarioRepository) {
         this.livrosRepository = livrosRepository;
+        this.usuarioRepository = usuarioRepository;
     }
 
     public Livro buscarPorId(int id) throws SQLException {
@@ -37,11 +40,15 @@ public class LivroService {
         return response;
     }
 
-    public Livro criar(Livro livro, int usuarioId) throws SQLException {
+    public Livro criar(Livro livro, String email) throws SQLException {
         validarLivro(livro);
+        Usuario user = usuarioRepository.buscarPorEmail(email);
 
-        livro.setCriadoPor(usuarioId);
+        if (user == null) {
+            throw new IllegalArgumentException("Usuário inexistente");
+        }
 
+        livro.setCriadoPor(user.getId());
         return livrosRepository.criar(livro);
     }
 
@@ -62,8 +69,20 @@ public class LivroService {
     }
 
     private void validarLivro(Livro livro) {
+        if (livro == null) {
+            throw new IllegalArgumentException("Livro não pode ser nulo");
+        }
+
         if (livro.getTitulo() == null || livro.getTitulo().trim().isEmpty()) {
             throw new IllegalArgumentException("Título é obrigatório");
+        }
+
+        if (livro.getIsbn() == null || livro.getIsbn().trim().isEmpty()) {
+            throw new IllegalArgumentException("ISBN é obrigatório");
+        }
+
+        if (livro.getAutorId() == null) {
+            throw new IllegalArgumentException("Autor é obrigatório");
         }
     }
 }

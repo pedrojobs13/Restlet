@@ -33,7 +33,7 @@ public class CategoriaService {
         return response;
     }
 
-    public Map<String, Object> listarTodas() throws SQLException {
+    public Map<String, Object> listarTodas() throws SQLException{
         List<Categoria> categorias = categoriaRepository.listarTodas();
 
         Map<String, Object> response = new HashMap<>();

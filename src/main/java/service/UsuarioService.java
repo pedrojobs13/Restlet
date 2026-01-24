@@ -1,6 +1,5 @@
 package service;
 
-import lombok.RequiredArgsConstructor;
 import model.Usuario;
 import repository.UsuarioRepository;
 import utils.PasswordUtil;
@@ -28,22 +27,30 @@ public class UsuarioService {
         return usuarioRepository.listarTodos();
     }
 
-    public boolean atualizarUsuario(
-            int id,
-            Usuario usuario,
+    public boolean atualizarSenhaUsuario(
+            String email,
             String novaSenha
     ) throws SQLException {
-        boolean atualizado = usuarioRepository.atualizar(id, usuario);
+        Usuario usuario = usuarioRepository.buscarPorEmail(email);
 
         if (novaSenha != null && !novaSenha.trim().isEmpty()) {
             String senhaHash = PasswordUtil.hashPassword(novaSenha);
-            usuarioRepository.atualizarSenha(id, senhaHash);
+            return usuarioRepository.atualizarSenha(usuario.getId(), senhaHash);
         }
 
-        return atualizado;
+        return false;
     }
 
-    public boolean deletarUsuario(int id) throws SQLException {
-        return usuarioRepository.deletar(id);
+    public void deletarUsuario(String email) throws SQLException {
+        Usuario usuario = usuarioRepository.buscarPorEmail(email);
+        usuarioRepository.deletar(usuario.getId());
+    }
+
+    public boolean atualizarNomeUsuario(String email, String nome) throws SQLException {
+
+        Usuario usuario = usuarioRepository.buscarPorEmail(email);
+        usuario.setNome(nome);
+
+        return usuarioRepository.atualizar(usuario.getId(), usuario);
     }
 }

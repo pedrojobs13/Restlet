@@ -1,15 +1,16 @@
 package controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
 import model.Usuario;
+import org.restlet.data.Header;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
-import org.restlet.resource.Get;
-import org.restlet.resource.ServerResource;
+import org.restlet.resource.*;
+import org.restlet.util.Series;
 import repository.UsuarioRepositoryImpl;
 import service.UsuarioService;
+import utils.JWTUtil;
+import utils.ObjectMapperProvider;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -65,7 +66,11 @@ public class UsuarioController extends ServerResource {
                 response.put("criadoEm", usuario.getCriadoEm());
 
                 setStatus(Status.SUCCESS_OK);
-                return new JacksonRepresentation<>(response);
+                JacksonRepresentation<Map<String, Object>> rep =
+                        new JacksonRepresentation<>(response);
+                rep.setObjectMapper(ObjectMapperProvider.get());
+
+                return rep;
             }
 
             if (!"admin".equals(userRole)) {
@@ -89,10 +94,15 @@ public class UsuarioController extends ServerResource {
             }
 
             setStatus(Status.SUCCESS_OK);
-            return new JacksonRepresentation<>(Map.of(
-                    "data", usuariosSemSenha,
-                    "total", usuariosSemSenha.size()
-            ));
+
+            JacksonRepresentation<Map<String, Object>> rep =
+                    new JacksonRepresentation<>(Map.of(
+                            "data", usuariosSemSenha,
+                            "total", usuariosSemSenha.size()
+                    ));
+            rep.setObjectMapper(ObjectMapperProvider.get());
+
+            return rep;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -101,5 +111,122 @@ public class UsuarioController extends ServerResource {
                     "erro", "Erro ao buscar usuários"
             ));
         }
+    }
+
+    @Put("json")
+    @Patch("senha")
+    public Representation atualizarSenha(Representation entity) {
+        try {
+            Series<Header> headers = getRequestHeaders();
+            String authHeader = headers.getFirstValue("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                setStatus(org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED);
+                return new JacksonRepresentation<>(Map.of("erro", "Token não informado"));
+            }
+
+            String token = authHeader.substring("Bearer ".length());
+
+            String email = JWTUtil.getEmailFromToken(token);
+
+            JacksonRepresentation<Map> repr =
+                    new JacksonRepresentation<>(entity, Map.class);
+            repr.setObjectMapper(ObjectMapperProvider.get());
+
+            String senha = (String) repr.getObject().get("senha");
+
+            var response = usuarioService.atualizarSenhaUsuario(email, senha);
+            setStatus(Status.SUCCESS_CREATED);
+            return new JacksonRepresentation<>(response);
+
+        } catch (IllegalArgumentException e) {
+            setStatus(org.restlet.data.Status.CLIENT_ERROR_NOT_FOUND);
+            return new JacksonRepresentation<>(Map.of("erro", e.getMessage()));
+
+        } catch (Exception e) {
+            setStatus(org.restlet.data.Status.SERVER_ERROR_INTERNAL);
+            return new JacksonRepresentation<>(Map.of("erro", "Erro ao atualizar usuario"));
+        }
+    }
+
+    @Put("json")
+    public Representation atualizar(Representation entity) {
+        try {
+            Series<Header> headers = getRequestHeaders();
+            String authHeader = headers.getFirstValue("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
+                return new JacksonRepresentation<>("Token não informado");
+            }
+
+            String token = authHeader.substring("Bearer ".length());
+            String email = JWTUtil.getEmailFromToken(token);
+
+            JacksonRepresentation<Map> repr =
+                    new JacksonRepresentation<>(entity, Map.class);
+            repr.setObjectMapper(ObjectMapperProvider.get());
+
+            Map<String, Object> body = repr.getObject();
+
+            String nome = (String) body.get("nome");
+            if (nome == null || nome.isBlank()) {
+                setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+                return new JacksonRepresentation<>("Nome não fornecido");
+            }
+
+            usuarioService.atualizarNomeUsuario(email, nome);
+
+            setStatus(Status.SUCCESS_OK);
+            return new JacksonRepresentation<>("Nome atualizado com sucesso");
+
+        } catch (IllegalArgumentException e) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return new JacksonRepresentation<>(e.getMessage());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            setStatus(Status.SERVER_ERROR_INTERNAL);
+            return new JacksonRepresentation<>("Erro ao atualizar usuário");
+        }
+    }
+
+    @Delete("json")
+    public Representation deletar() {
+        try {
+            Series<Header> headers = getRequestHeaders();
+
+            String authHeader = headers.getFirstValue("Authorization");
+
+            if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+                setStatus(org.restlet.data.Status.CLIENT_ERROR_UNAUTHORIZED);
+                return new JacksonRepresentation<>(Map.of("erro", "Token não informado"));
+            }
+
+            String token = authHeader.substring("Bearer ".length());
+
+            String email = JWTUtil.getEmailFromToken(token);
+
+            usuarioService.deletarUsuario(email);
+
+            setStatus(Status.SUCCESS_NO_CONTENT);
+            return null;
+
+        } catch (IllegalArgumentException e) {
+            setStatus(Status.CLIENT_ERROR_NOT_FOUND);
+            return new JacksonRepresentation<>(e.getMessage());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            setStatus(Status.SERVER_ERROR_INTERNAL);
+            return new JacksonRepresentation<>("Erro ao deletar categoria");
+        }
+    }
+
+
+    @SuppressWarnings("unchecked")
+    private Series<Header> getRequestHeaders() {
+        return (Series<Header>) getRequest().getAttributes()
+                .get("org.restlet.http.headers");
     }
 }

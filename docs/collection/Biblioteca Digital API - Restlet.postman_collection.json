@@ -1,0 +1,910 @@
+{
+  "info": {
+    "_postman_id": "e9178ab6-0af4-4d32-89ef-1bb9aa79143f",
+    "name": "Biblioteca Digital API - Restlet",
+    "description": "API RESTful completa para gerenciamento de biblioteca digital\n\n**Grupo 3** - Sistemas Distribuídos UFES 2025/2\n\n**Tecnologias:**\n- Restlet Framework\n- MySQL\n- JWT Authentication\n\n**Como usar:**\n1. Execute a aplicação (porta 8080)\n2. Faça registro/login em Auth\n3. Copie o token retornado\n4. Use o token nas requisições protegidas",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "43635556",
+    "_collection_link": "https://go.postman.co/collection/43635556-e9178ab6-0af4-4d32-89ef-1bb9aa79143f?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "🔐 Autenticação",
+      "item": [
+        {
+          "name": "Registrar Usuário",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"jwt_token\", jsonData.token);",
+                  "    pm.environment.set(\"user_email\", jsonData.usuario.email);",
+                  "    pm.environment.set(\"user_id\", jsonData.usuario.id);",
+                  "    console.log(\"Token JWT salvo: \" + jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva\",\n  \"email\": \"joao@email.com\",\n  \"senha\": \"senha123\",\n  \"funcao\": \"user\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Criar nova conta de usuário.\n\n**Campos:**\n- `nome` - Nome completo (obrigatório)\n- `email` - Email válido (obrigatório, único)\n- `senha` - Mínimo 6 caracteres (obrigatório)\n- `funcao` - \"user\" ou \"admin\" (padrão: \"user\")\n\n**Retorna:** Token JWT para autenticação"
+          },
+          "response": []
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code >= 200 && pm.response.code < 300) {",
+                  "    var json = JSON.parse(pm.response.text());",
+                  "    pm.environment.set('jwt_token', json.data.token);",
+                  "}"
+                ],
+                "type": "text/javascript",
+                "packages": {},
+                "requests": {}
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"joao@email.com\",\n  \"senha\": \"senha123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/login",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "login"
+              ]
+            },
+            "description": "Autenticar usuário existente.\n\n**Campos:**\n- `email` - Email cadastrado\n- `senha` - Senha do usuário\n\n**Retorna:** Token JWT válido por 24 horas"
+          },
+          "response": []
+        },
+        {
+          "name": "Registrar Admin",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.environment.set(\"admin_token\", jsonData.token);",
+                  "    console.log(\"Token Admin salvo: \" + jsonData.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Admin Sistema\",\n  \"email\": \"admin@biblioteca.com\",\n  \"senha\": \"admin123\",\n  \"funcao\": \"admin\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/auth/register",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "auth",
+                "register"
+              ]
+            },
+            "description": "Criar conta de administrador para testes"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints de autenticação (públicos - sem token)"
+    },
+    {
+      "name": "📚 Livros",
+      "item": [
+        {
+          "name": "Listar Livros",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/livros?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "livros"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": "Número da página"
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": "Itens por página"
+                },
+                {
+                  "key": "titulo",
+                  "value": "",
+                  "description": "Filtrar por título",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Listar todos os livros com paginação e filtros.\n\n**Público** - Não requer autenticação\n\n**Query Params:**\n- `page` - Página (padrão: 1)\n- `limit` - Itens por página (padrão: 10)\n- `titulo` - Filtro por título (opcional)"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Livro por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/livros/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "livros",
+                "1"
+              ]
+            },
+            "description": "Buscar detalhes de um livro específico.\n\n**Público** - Não requer autenticação\n\nRetorna livro com categorias associadas"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Livro",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"dasd\",\n  \"descricao\": \"Romance distópico de George Orwell\",\n  \"anoDePublicacao\": 1949,\n  \"isbn\": \"9780451524935\",\n  \"autorId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/livros",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "livros"
+              ]
+            },
+            "description": "Criar novo livro.\n\n**Requer autenticação** (User ou Admin)\n\n**Campos:**\n- `titulo` - Título do livro (obrigatório)\n- `descricao` - Descrição (opcional)\n- `anoDePublicacao` - Ano (opcional)\n- `isbn` - ISBN único (obrigatório)\n- `autorId` - ID do autor (obrigatório)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Livro",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"titulo\": \"1984 - Edição Atualizada\",\n  \"descricao\": \"Romance distópico clássico de George Orwell\",\n  \"anoDePublicacao\": 1949,\n  \"isbn\": \"9780451524935\",\n  \"autorId\": 1\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/livros/6",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "livros",
+                "6"
+              ]
+            },
+            "description": "Atualizar livro existente.\n\n**Requer autenticação** (User ou Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Livro",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/livros/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "livros",
+                "1"
+              ]
+            },
+            "description": "Deletar livro.\n\n**Requer autenticação** (User ou Admin)\n\nRemove também associações com categorias"
+          },
+          "response": []
+        },
+        {
+          "name": "Filtrar Livros por Título",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/livros?titulo=Dom&page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "livros"
+              ],
+              "query": [
+                {
+                  "key": "titulo",
+                  "value": "Dom"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "Exemplo de filtro por título\n\nBusca livros que contenham 'Dom' no título"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gerenciar livros"
+    },
+    {
+      "name": "✍️ Autores",
+      "item": [
+        {
+          "name": "Listar Autores",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/autores?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autores"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                },
+                {
+                  "key": "nome",
+                  "value": "",
+                  "disabled": true
+                }
+              ]
+            },
+            "description": "Listar todos os autores.\n\n**Público** - Não requer autenticação"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Autor por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/autores/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autores",
+                "1"
+              ]
+            },
+            "description": "Buscar detalhes de um autor.\n\n**Público** - Não requer autenticação"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Autor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Machado de Assis\",\n  \"bio\": \"Considerado o maior nome da literatura brasileira\",\n  \"dataNascimento\": \"1839-06-21\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/autores",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autores"
+              ]
+            },
+            "description": "Criar novo autor.\n\n**Requer autenticação** (User ou Admin)\n\n**Campos:**\n- `nome` - Nome completo (obrigatório, max 150 chars)\n- `bio` - Biografia (opcional, max 255 chars)\n- `dataNascimento` - Data no formato YYYY-MM-DD (opcional)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Autor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Machado de Assis\",\n  \"bio\": \"Escritor brasileiro, fundador da Academia Brasileira de Letras\",\n  \"dataNascimento\": \"1839-06-21\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/autores/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autores",
+                "1"
+              ]
+            },
+            "description": "Atualizar autor existente.\n\n**Requer autenticação** (User ou Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Autor",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/autores/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autores",
+                "1"
+              ]
+            },
+            "description": "Deletar autor.\n\n**Requer autenticação** (User ou Admin)\n\n**IMPORTANTE:** Não é possível deletar autor que possui livros associados (ON DELETE RESTRICT)"
+          },
+          "response": []
+        },
+        {
+          "name": "Listar Livros de um Autor",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/autores/1/livros?page=1&limit=10",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "autores",
+                "1",
+                "livros"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            },
+            "description": "**Endpoint de Relacionamento** (RF08)\n\nListar todos os livros de um autor específico.\n\n**Público** - Não requer autenticação\n\nRetorna informações do autor + lista de livros paginada"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gerenciar autores"
+    },
+    {
+      "name": "🏷️ Categorias",
+      "item": [
+        {
+          "name": "Listar Categorias",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "description": "Listar todas as categorias.\n\n**Público** - Não requer autenticação"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Categoria por ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categorias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categorias",
+                "1"
+              ]
+            },
+            "description": "Buscar categoria específica.\n\n**Público** - Não requer autenticação\n\nRetorna também quantidade de livros associados"
+          },
+          "response": []
+        },
+        {
+          "name": "Criar Categoria",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Ficção Científica\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categorias",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categorias"
+              ]
+            },
+            "description": "Criar nova categoria.\n\n**Requer autenticação** (User ou Admin)\n\n**Campos:**\n- `nome` - Nome da categoria (obrigatório, único, max 100 chars)"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Categoria",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"Sci-Fi\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/categorias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categorias",
+                "1"
+              ]
+            },
+            "description": "Atualizar categoria existente.\n\n**Requer autenticação** (User ou Admin)"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Categoria",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/categorias/1",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "categorias",
+                "1"
+              ]
+            },
+            "description": "Deletar categoria.\n\n**Requer autenticação** (User ou Admin)\n\n**IMPORTANTE:** Não é possível deletar categoria com livros associados"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gerenciar categorias"
+    },
+    {
+      "name": "👥 Usuários",
+      "item": [
+        {
+          "name": "Listar Todos Usuários",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Listar todos os usuários do sistema.\n\n**Apenas ADMIN** - Requer token de administrador\n\nSenhas são removidas da resposta"
+          },
+          "response": []
+        },
+        {
+          "name": "Buscar Usuário por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios/{{user_id}}",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios",
+                "{{user_id}}"
+              ]
+            },
+            "description": "Buscar usuário específico.\n\n**Requer autenticação**\n- Usuário pode ver apenas seus próprios dados\n- Admin pode ver qualquer usuário"
+          },
+          "response": []
+        },
+        {
+          "name": "Atualizar Nome Usuário",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"nome\": \"João Silva Santos x\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Atualizar dados do usuário.\n\n**Requer autenticação**\n- Usuário pode atualizar apenas seus dados\n- Admin pode atualizar qualquer usuário\n\n**Campos opcionais:**\n- `nome` - Novo nome\n- `email` - Novo email (deve ser único)\n- `senha` - Nova senha (mín. 6 chars)\n- `funcao` - Apenas admin pode alterar"
+          },
+          "response": []
+        },
+        {
+          "name": "Alterar Senha",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{jwt_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer SEU_TOKEN"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"senha\": \"novaSenha123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "http://localhost:8080/usuarios/senha",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "usuarios",
+                "senha"
+              ]
+            },
+            "description": "Alterar apenas a senha do usuário.\n\nMínimo 6 caracteres"
+          },
+          "response": []
+        },
+        {
+          "name": "Deletar Usuário",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{admin_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/usuarios",
+              "host": [
+                "{{base_url}}"
+              ],
+              "path": [
+                "usuarios"
+              ]
+            },
+            "description": "Deletar usuário do sistema.\n\n**Apenas ADMIN**\n\n**Restrições:**\n- Admin não pode deletar a si mesmo\n- Não pode deletar usuário que criou livros (FK constraint)"
+          },
+          "response": []
+        }
+      ],
+      "description": "Endpoints para gerenciar usuários (requerem permissões especiais)"
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "jwt_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "admin_token",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_email",
+      "value": "",
+      "type": "string"
+    },
+    {
+      "key": "user_id",
+      "value": "",
+      "type": "string"
+    }
+  ]
+}

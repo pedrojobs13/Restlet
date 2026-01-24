@@ -1,6 +1,5 @@
 package service;
 
-import lombok.RequiredArgsConstructor;
 import model.Usuario;
 import repository.UsuarioRepository;
 import utils.JWTUtil;

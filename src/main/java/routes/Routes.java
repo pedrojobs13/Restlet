@@ -26,7 +26,7 @@ public class Routes extends Application {
         router.attach("/categorias/{id}", CategoriaController.class);
 
         router.attach("/usuarios", UsuarioController.class);
-        router.attach("/usuarios/{id}", UsuarioController.class);
+        router.attach("/usuarios/senha", UsuarioController.class);
 
         AuthFilter authFilter = new AuthFilter(getContext());
         authFilter.setNext(router);
