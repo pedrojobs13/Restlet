@@ -1,13 +1,14 @@
 package config;
-import org.flywaydb.core.Flyway;
-public class FlywayConfig {
-    public static void migrate() {
 
+import org.flywaydb.core.Flyway;
+
+public class FlywayConfig {
+    public static void migrate(String URL, String USER, String PASS) {
         Flyway flyway = Flyway.configure()
                 .dataSource(
-                        "jdbc:mysql://localhost:3306/biblioteca?useSSL=false&serverTimezone=UTC",
-                        "biblioteca_user",
-                        "biblioteca_pass"
+                        URL,
+                        USER,
+                        PASS
                 )
                 .load();
 
