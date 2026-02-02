@@ -3,6 +3,7 @@ package controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import model.Autor;
+import model.Livro;
 import org.restlet.data.Status;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.Representation;
@@ -76,6 +77,7 @@ public class AutorController extends ServerResource {
     @Post("json")
     public Representation criar(Representation entity) {
         try {
+
             String json = entity.getText();
             Autor autor = mapper.readValue(json, Autor.class);
 
@@ -97,11 +99,12 @@ public class AutorController extends ServerResource {
             Autor criado = autorService.criar(autor);
 
             setStatus(Status.SUCCESS_CREATED);
-            return new JacksonRepresentation<>(Map.of(
-                    "mensagem", "Autor criado com sucesso",
-                    "autor", criado
-            ));
 
+            JacksonRepresentation<Autor> rep =
+                    new JacksonRepresentation<>(criado);
+            rep.setObjectMapper(ObjectMapperProvider.get());
+
+            return rep;
         } catch (IllegalArgumentException e) {
             setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
             return new JacksonRepresentation<>(Map.of("erro", e.getMessage()));
