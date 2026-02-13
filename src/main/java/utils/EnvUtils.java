@@ -1,32 +1,43 @@
 package utils;
 
-import io.github.cdimascio.dotenv.Dotenv;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
 
 public class EnvUtils {
-    private static EnvUtils INSTANCE;
-    private static Dotenv dotenv;
 
-    private EnvUtils() {
+    private static final Properties properties = new Properties();
+
+    static {
+        try (InputStream input = EnvUtils.class.getClassLoader().getResourceAsStream("application.properties")) {
+            if (input == null) {
+                System.out.println("Desculpe, não consegui encontrar o arquivo application.properties");
+            } else {
+                properties.load(input);
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
     }
 
-    public static EnvUtils getInstance() {
-        if (INSTANCE == null) {
-            dotenv = Dotenv.load();
-            INSTANCE = new EnvUtils();
-        }
+    public static String get(String key) {
+        String value = System.getenv(key.toUpperCase().replace(".", "_"));
 
-        return INSTANCE;
+        if (value == null) {
+            value = properties.getProperty(key);
+        }
+        return value;
     }
 
     public static String getUser() {
-        return dotenv.get("DB_USER");
+        return get("db.user");
     }
 
     public static String getPass() {
-        return dotenv.get("DB_PASS");
+        return get("db.pass");
     }
 
     public static String getHost() {
-        return dotenv.get("DB_HOST");
+        return get("db.host");
     }
 }

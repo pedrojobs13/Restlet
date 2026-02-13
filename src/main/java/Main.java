@@ -7,7 +7,10 @@ import utils.EnvUtils;
 public class Main {
 
     public static void main(String[] args) throws Exception {
-        EnvUtils.getInstance();
+
+        System.out.println(EnvUtils.getUser());
+        System.out.println( EnvUtils.getPass());
+
         FlywayConfig.migrate(EnvUtils.getHost(), EnvUtils.getUser(), EnvUtils.getPass());
         Component component = new Component();
         component.getServers().add(Protocol.HTTP, 8080);
