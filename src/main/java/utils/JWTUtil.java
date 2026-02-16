@@ -10,8 +10,8 @@ import java.security.Key;
 import java.util.Date;
 
 public class JWTUtil {
-    private static final String SECRET = "minhaChaveSecretaSuperSegura123456789012345678901234567890";
-    private static final long EXPIRATION = 86400000; // 24 horas
+    private static final String SECRET = EnvUtils.getJwt();
+    private static final long EXPIRATION = EnvUtils.getExpiration();
     private static final Key KEY = Keys.hmacShaKeyFor(SECRET.getBytes());
 
     public static String generateToken(String email, String funcao) {

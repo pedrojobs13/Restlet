@@ -40,4 +40,15 @@ public class EnvUtils {
     public static String getHost() {
         return get("db.host");
     }
+
+    public static String getJwt() {
+        return get("jwt");
+    }
+    public static long getExpiration() {
+        String expirationStr = get("expiration");
+        if (expirationStr == null) {
+            throw new RuntimeException("Key 'expiration' not found in properties or env vars");
+        }
+        return Long.parseLong(expirationStr);
+    }
 }
